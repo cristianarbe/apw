@@ -1,0 +1,20 @@
+#!/bin/bash
+if [[ $EUID -ne 0 ]]; then
+   echo "apw must be run as root" 
+   exit 1
+fi
+
+i(){
+  apt update && apt install $@
+}
+
+rm(){
+  apt update && apt install $@ && apt autoremove
+}
+
+upgrade(){
+  apt update && apt upgrade && apt autoremove
+}
+
+
+"$@"
