@@ -38,4 +38,4 @@ It is 10 lines of bash, [check it yourself](https://github.com/cristianarbe/apw/
 ## Contributing
 
 Suggestions/improvements
-[welcome](https://github.com/cristianarbe/bootstrap-script/issues)!
+[welcome](https://github.com/cristianarbe/apw/issues)!
