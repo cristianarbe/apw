@@ -1,9 +1,33 @@
 # apw
 
+Simple bash wrapper for apt
+
 ## Installation
 
+```sh
+npm install my-crazy-module --save
 ```
-# git clone --depth 1 https://github.com/cristianarbe/apw.git /opt/apw
-# chmod +x /opt/apw/apw
-# ln -s /opt/apw/apw /usr/local/bin/apw
+
+## What
+
+Simple bash wrapper for apt. Has three basic commands:
+
 ```
+$ apw i [PACKAGE]
+$ apw rm [PACKAGE]
+$ apw upgrade
+```
+
+## Why
+
+Because typing "sudo" and "update" a million times is tiring.
+
+## How
+
+It is 10 lines of bash, [check it yourself](https://github.com/cristianarbe/apw/blob/master/apw).
+
+
+## Contributing
+
+Suggestions/improvements
+[welcome](https://github.com/cristianarbe/bootstrap-script/issues)!
