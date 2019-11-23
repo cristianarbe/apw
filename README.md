@@ -2,10 +2,18 @@
 
 Simple bash wrapper for apt
 
-## Installation
+## Installing
 
-```sh
-npm install my-crazy-module --save
+```
+# mkdir /opt/apw
+# git clone https://github.com/cristianarbe/apw /opt/apw
+# ln -s /opt/apw/apw /usr/local/bin
+```
+
+## Uninstalling
+
+```
+# rm -rf /opt/apw
 ```
 
 ## What
