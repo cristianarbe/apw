@@ -4,11 +4,11 @@ i(){
 }
 
 rm(){
-  sudo apt update && sudo apt install $@ && sudo apt autoremove
+  sudo apt update && sudo apt purge $@ && sudo apt autoremove -y
 }
 
 upgrade(){
-  sudo apt update && sudo apt upgrade && sudo apt autoremove
+  sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
 }
 
 
