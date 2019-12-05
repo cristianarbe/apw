@@ -5,9 +5,7 @@ Simple bash wrapper for apt
 ## Installing
 
 ```
-# mkdir /opt/apw
-# git clone https://github.com/cristianarbe/apw /opt/apw
-# ln -s /opt/apw/apw /usr/local/bin
+# wget https://raw.githubusercontent.com/cristianarbe/apw/master/apw -P ~/.local/bin
 ```
 
 ## Uninstalling
