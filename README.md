@@ -11,7 +11,7 @@ $ wget https://raw.githubusercontent.com/cristianarbe/apw/master/apw -P ~/.local
 ## Uninstalling
 
 ```
-# rm -rf /opt/apw
+$ rm ~/.local/bin/apw
 ```
 
 ## What
