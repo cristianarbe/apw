@@ -1,15 +1,78 @@
-#!/bin/bash
-i(){
-  sudo apt update && sudo apt install $@
+#!/bin/env sh
+
+update_cache() {
+  mkdir -p ~/.cache/apw/
+  case $PACKAGE_MANAGER in
+  choco)
+    choco list -lo | grep -v 'packages installed' | cut -d ' ' -f 1 |
+      tail -n +2 >~/.cache/apw/installed
+    ;;
+  esac
 }
 
-rm(){
-  sudo apt update && sudo apt purge $@ && sudo apt autoremove -y
+add() {
+  case $PACKAGE_MANAGER in
+  apt)
+    sudo apt update && sudo apt install "$@"
+    ;;
+  choco)
+    choco install "$@"
+    update_cache
+    ;;
+  esac
 }
 
-upgrade(){
-  sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
+del() {
+  case $PACKAGE_MANAGER in
+  apt)
+    sudo apt update && sudo apt purge "$@" && sudo apt autoremove -y
+    ;;
+  choco)
+    choco uninstall "$@"
+    update_cache
+    ;;
+  esac
 }
 
+upgrade() {
+  case $PACKAGE_MANAGER in
+  apt)
+    sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
+    ;;
+  choco)
+    choco upgrade all -y
+    update_cache
+    ;;
+  esac
+}
 
-"$@"
+info() {
+  case $PACKAGE_MANAGER in
+  apt)
+    sudo apt list --installed
+    ;;
+  choco)
+    if test ! -f ~/.cache/apw/installed; then
+      update_cache
+    fi
+    cat ~/.cache/apw/installed
+    ;;
+  esac
+}
+
+main() {
+
+  if test ! -f ~/.cache/apw/package_manager; then
+    if apt -v >/dev/null 2>&1; then
+      echo "apt" >~/.cache/apw/package_manager
+    elif choco -v >/dev/null 2>&1; then
+      echo "choco" >~/.cache/apw/package_manager
+    fi
+  fi
+
+  PACKAGE_MANAGER=$(cat ~/.cache/apw/package_manager)
+
+  "$@"
+}
+
+main "$@"
