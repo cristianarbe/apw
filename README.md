@@ -5,7 +5,7 @@ Simple bash wrapper for apt
 ## Installing
 
 ```
-# wget https://raw.githubusercontent.com/cristianarbe/apw/master/apw -P ~/.local/bin
+$ wget https://raw.githubusercontent.com/cristianarbe/apw/master/apw -P ~/.local/bin
 ```
 
 ## Uninstalling
