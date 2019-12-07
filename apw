@@ -16,7 +16,7 @@ update_cache() {
 fn_add() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt update && sudo apt install "$@"
+    sudo apt update && sudo apt install $@
     ;;
   choco)
     choco install "$@"
@@ -68,7 +68,7 @@ main() {
 
   PACKAGE_MANAGER=$(cat ~/.cache/apw/package_manager)
 
-  if ! "$@" 2>/dev/null; then
+  if ! $@ 2>/dev/null; then
     echo "arguments not recognised" >&2
   fi
 }
