@@ -1,4 +1,4 @@
-#!/bin/env sh
+#!/bin/env dash
 
 update_cache() {
   mkdir -p ~/.cache/apw/
@@ -7,10 +7,13 @@ update_cache() {
     choco list -lo | grep -v 'packages installed' | cut -d ' ' -f 1 |
       tail -n +2 >~/.cache/apw/installed
     ;;
+  apt)
+    (sudo apt list --installed | sed 's/\/.*$//g' ) >~/.cache/apw/installed
+    ;;
   esac
 }
 
-add() {
+fn_add() {
   case $PACKAGE_MANAGER in
   apt)
     sudo apt update && sudo apt install "$@"
@@ -22,7 +25,7 @@ add() {
   esac
 }
 
-del() {
+fn_del() {
   case $PACKAGE_MANAGER in
   apt)
     sudo apt update && sudo apt purge "$@" && sudo apt autoremove -y
@@ -34,7 +37,7 @@ del() {
   esac
 }
 
-upgrade() {
+fn_upgrade() {
   case $PACKAGE_MANAGER in
   apt)
     sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
@@ -46,18 +49,11 @@ upgrade() {
   esac
 }
 
-info() {
-  case $PACKAGE_MANAGER in
-  apt)
-    sudo apt list --installed
-    ;;
-  choco)
-    if test ! -f ~/.cache/apw/installed; then
-      update_cache
-    fi
-    cat ~/.cache/apw/installed
-    ;;
-  esac
+fn_info() {
+  if test ! -f ~/.cache/apw/installed; then
+    update_cache
+  fi
+  cat ~/.cache/apw/installed
 }
 
 main() {
@@ -72,7 +68,9 @@ main() {
 
   PACKAGE_MANAGER=$(cat ~/.cache/apw/package_manager)
 
-  "$@"
+  if ! "$@" 2>/dev/null; then
+    echo "arguments not recognised" >&2
+  fi
 }
 
-main "$@"
+main fn_"$*"
