@@ -1,5 +1,7 @@
 #!/bin/env dash
 
+set -ex
+
 update_cache() {
   case $PACKAGE_MANAGER in
   choco)
@@ -85,7 +87,7 @@ main() {
 
   PACKAGE_MANAGER=$(cat ~/.cache/apw/package_manager)
 
-  if ! fn_"$*" 2>/dev/null; then
+  if ! "$@" 2>/dev/null; then
     echo "arguments not recognised" >&2
   fi
 }
