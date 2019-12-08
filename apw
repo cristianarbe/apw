@@ -1,7 +1,5 @@
 #!/bin/env dash
 
-set -ex
-
 update_cache() {
   case $PACKAGE_MANAGER in
   choco)
@@ -46,10 +44,13 @@ fn_del() {
 fn_upgrade() {
   case $PACKAGE_MANAGER in
   apt)
-    echo "Updating database..."
+    printf "Updating database... "
     sudo apt update >/dev/null 2>&1
+    printf "Done\\n"
     sudo apt upgrade -y
-    sudo apt autoremove -y
+    printf "Removing no longer needed packages... "
+    sudo apt autoremove -y >/dev/null 2>&1
+    printf "Done\\n"
     ;;
   choco)
     choco upgrade all -y
