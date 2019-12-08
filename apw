@@ -1,14 +1,13 @@
 #!/bin/env dash
 
 update_cache() {
-  mkdir -p ~/.cache/apw/
   case $PACKAGE_MANAGER in
   choco)
     choco list -lo | grep -v 'packages installed' | cut -d ' ' -f 1 |
       tail -n +2 >~/.cache/apw/installed
     ;;
   apt)
-    (sudo apt list --installed | sed 's/\/.*$//g' ) >~/.cache/apw/installed
+    (sudo apt list --installed | sed 's/\/.*$//g') >~/.cache/apw/installed
     ;;
   esac
 }
@@ -16,7 +15,9 @@ update_cache() {
 fn_add() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt update && sudo apt install $@
+    echo "Updating database..."
+    sudo apt update >/dev/null 2>&1
+    sudo apt install "$@"
     ;;
   choco)
     choco install "$@"
@@ -28,7 +29,10 @@ fn_add() {
 fn_del() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt update && sudo apt purge "$@" && sudo apt autoremove -y
+    echo "Updating database..."
+    sudo apt update >/dev/null 2>&1
+    sudo apt purge "$@"
+    sudo apt autoremove -y
     ;;
   choco)
     choco uninstall "$@"
@@ -40,7 +44,10 @@ fn_del() {
 fn_upgrade() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
+    echo "Updating database..."
+    sudo apt update >/dev/null 2>&1
+    sudo apt upgrade -y
+    sudo apt autoremove -y
     ;;
   choco)
     choco upgrade all -y
@@ -50,13 +57,23 @@ fn_upgrade() {
 }
 
 fn_info() {
-  if test ! -f ~/.cache/apw/installed; then
-    update_cache
-  fi
-  cat ~/.cache/apw/installed
+  case $PACKAGE_MANAGER in
+  apt)
+    sudo apt list --installed
+    ;;
+  choco)
+    if test ! -f ~/.cache/apw/installed; then
+      update_cache
+    fi
+    cat ~/.cache/apw/installed
+    ;;
+  esac
 }
 
 main() {
+  if test ! -d ~/.cache/apw/; then
+    mkdir -p ~/.cache/apw/
+  fi
 
   if test ! -f ~/.cache/apw/package_manager; then
     if apt -v >/dev/null 2>&1; then
@@ -68,7 +85,7 @@ main() {
 
   PACKAGE_MANAGER=$(cat ~/.cache/apw/package_manager)
 
-  if ! $@ 2>/dev/null; then
+  if ! fn_"$*" 2>/dev/null; then
     echo "arguments not recognised" >&2
   fi
 }
