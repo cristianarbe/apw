@@ -1,7 +1,6 @@
 #!/bin/env sh
 
 update_cache() {
-  mkdir -p ~/.cache/apw/
   case $PACKAGE_MANAGER in
   choco)
     choco list -lo | grep -v 'packages installed' | cut -d ' ' -f 1 |
@@ -13,7 +12,9 @@ update_cache() {
 add() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt update && sudo apt install "$@"
+    echo "Updating database..."
+    sudo apt update >/dev/null 2>&1
+    sudo apt install "$@"
     ;;
   choco)
     choco install "$@"
@@ -25,7 +26,10 @@ add() {
 del() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt update && sudo apt purge "$@" && sudo apt autoremove -y
+    echo "Updating database..."
+    sudo apt update >/dev/null 2>&1
+    sudo apt purge "$@"
+    sudo apt autoremove -y
     ;;
   choco)
     choco uninstall "$@"
@@ -37,7 +41,10 @@ del() {
 upgrade() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
+    echo "Updating database..."
+    sudo apt update >/dev/null 2>&1
+    sudo apt upgrade -y
+    sudo apt autoremove -y
     ;;
   choco)
     choco upgrade all -y
@@ -61,6 +68,9 @@ info() {
 }
 
 main() {
+  if test ! -d ~/.cache/apw/; then
+    mkdir -p ~/.cache/apw/
+  fi
 
   if test ! -f ~/.cache/apw/package_manager; then
     if apt -v >/dev/null 2>&1; then
