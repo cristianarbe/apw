@@ -1,4 +1,4 @@
-#!/bin/env dash
+#!/bin/env sh
 
 update_cache() {
   case $PACKAGE_MANAGER in
@@ -29,8 +29,6 @@ fn_add() {
 fn_del() {
   case $PACKAGE_MANAGER in
   apt)
-    echo "Updating database..."
-    sudo apt update >/dev/null 2>&1
     sudo apt purge "$@"
     sudo apt autoremove -y
     ;;
@@ -44,7 +42,7 @@ fn_del() {
 fn_upgrade() {
   case $PACKAGE_MANAGER in
   apt)
-    printf "Updating database... "
+    printf "Updating database... \\n"
     sudo apt update >/dev/null 2>&1
     printf "Done\\n"
     sudo apt upgrade -y
@@ -88,9 +86,7 @@ main() {
 
   PACKAGE_MANAGER=$(cat ~/.cache/apw/package_manager)
 
-  if ! "$@" 2>/dev/null; then
-    echo "arguments not recognised" >&2
-  fi
+  $@
 }
 
 main fn_"$*"
