@@ -1,13 +1,39 @@
 #!/bin/env sh
 
+check_package_manager() {
+  if /bin/flatpak --version >/dev/null 2>&1; then
+    printf "flatpak" >~/.cache/apw/package_manager
+  elif apt -v >/dev/null 2>&1; then
+    printf "apt" >~/.cache/apw/package_manager
+  elif choco -v >/dev/null 2>&1; then
+    printf "choco" >~/.cache/apw/package_manager
+  fi
+}
+
+startup() {
+  if test ! -d ~/.cache/apw/; then
+    mkdir -p ~/.cache/apw/
+  fi
+
+  if test ! -f ~/.cache/apw/package_manager; then
+    check_package_manager
+  fi
+}
+
 update_cache() {
   case $PACKAGE_MANAGER in
   choco)
-    choco list -lo | grep -v 'packages installed' | cut -d ' ' -f 1 |
+    choco list -lo | grep -v 'packages installed' |
+      cut -d ' ' -f 1 |
       tail -n +2 >~/.cache/apw/installed
     ;;
   apt)
-    (sudo apt list --installed | sed 's/\/.*$//g') >~/.cache/apw/installed
+    (apt list --installed | sed 's/\/.*$//g') \
+      >~/.cache/apw/installed
+
+    ;;
+  flatpak)
+    (/bin/flatpak --user list) >~/.cache/apw/installed
     ;;
   esac
 }
@@ -15,13 +41,28 @@ update_cache() {
 fn_add() {
   case $PACKAGE_MANAGER in
   apt)
-    echo "Updating database..."
-    sudo apt update >/dev/null 2>&1
+    sudo apt update
     sudo apt install "$@"
     ;;
   choco)
     choco install "$@"
     update_cache
+    ;;
+  flatpak)
+    /bin/flatpak --user install "$@"
+    ;;
+  esac
+}
+
+fn_search() {
+  case $PACKAGE_MANAGER in
+  apt)
+    sudo apt update
+    apt search "$@"
+    ;;
+  choco) ;;
+  flatpak)
+    /bin/flatpak --user search "$@"
     ;;
   esac
 }
@@ -29,12 +70,15 @@ fn_add() {
 fn_del() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt purge "$@"
-    sudo apt autoremove -y
+    apt purge "$@"
+    apt autoremove -y
     ;;
   choco)
     choco uninstall "$@"
     update_cache
+    ;;
+  flatpak)
+    /bin/flatpak --user uninstall "$@"
     ;;
   esac
 }
@@ -42,17 +86,16 @@ fn_del() {
 fn_upgrade() {
   case $PACKAGE_MANAGER in
   apt)
-    printf "Updating database... \\n"
-    sudo apt update >/dev/null 2>&1
-    printf "Done\\n"
+    sudo apt update
     sudo apt upgrade -y
-    printf "Removing no longer needed packages... "
     sudo apt autoremove -y >/dev/null 2>&1
-    printf "Done\\n"
     ;;
   choco)
     choco upgrade all -y
     update_cache
+    ;;
+  flatpak)
+    /bin/flatpak --user update
     ;;
   esac
 }
@@ -60,7 +103,7 @@ fn_upgrade() {
 fn_info() {
   case $PACKAGE_MANAGER in
   apt)
-    sudo apt list --installed
+    apt list --installed
     ;;
   choco)
     if test ! -f ~/.cache/apw/installed; then
@@ -68,24 +111,18 @@ fn_info() {
     fi
     cat ~/.cache/apw/installed
     ;;
+  flatpak)
+    /bin/flatpak --user list
+    ;;
   esac
 }
 
 main() {
-  if test ! -d ~/.cache/apw/; then
-    mkdir -p ~/.cache/apw/
-  fi
-
-  if test ! -f ~/.cache/apw/package_manager; then
-    if apt -v >/dev/null 2>&1; then
-      echo "apt" >~/.cache/apw/package_manager
-    elif choco -v >/dev/null 2>&1; then
-      echo "choco" >~/.cache/apw/package_manager
-    fi
-  fi
+  startup
 
   PACKAGE_MANAGER=$(cat ~/.cache/apw/package_manager)
 
+  # shellcheck disable=SC2068
   $@
 }
 
