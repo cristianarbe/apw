@@ -1,0 +1,47 @@
+#!/bin/env sh
+
+set -e
+
+for import in "$SHPATH"/src/github.com/cristianarbe/apw/pkg/*.sh; do
+  # shellcheck disable=SC1090
+  . "$import"
+done
+
+check_package_manager() {
+  if /bin/flatpak --version >/dev/null 2>&1; then
+    printf "flatpak" >~/.cache/apw/package_manager
+  elif apt -v >/dev/null 2>&1; then
+    printf "apt" >~/.cache/apw/package_manager
+  elif choco -v >/dev/null 2>&1; then
+    printf "choco" >~/.cache/apw/package_manager
+  fi
+}
+
+startup() {
+  if test ! -d ~/.cache/apw/; then
+    mkdir -p ~/.cache/apw/
+  fi
+
+  if test ! -f ~/.cache/apw/package_manager; then
+    check_package_manager
+  fi
+}
+
+main() {
+  startup
+
+  PACKAGE_MANAGER=$(cat ~/.cache/apw/package_manager)
+
+  case "$PACKAGE_MANAGER" in
+  choco | apt | flatpak)
+    # shellcheck disable=SC2086
+    ${PACKAGE_MANAGER}_$*
+    ;;
+  *)
+    echo "No supported package manager found"
+    ;;
+  esac
+
+}
+
+main "$@"
